@@ -11,11 +11,13 @@
   libmicrohttpd,
   pkg-config,
   postgresql,
-  taler-exchange,
-  taler-merchant,
+  # taler-exchange,
+  # taler-merchant,
   libsodium,
+  callPackage,
 }: let
   version = "0.9.3";
+  taler = callPackage ./taler.nix {};
 in
   stdenv.mkDerivation rec {
     name = "challenger";
@@ -51,8 +53,8 @@ in
     ];
 
     buildInputs = [
-      taler-exchange
-      taler-merchant
+      taler.taler-exchange
+      taler.taler-merchant
       gnunet
 
       libmicrohttpd
