@@ -21,7 +21,7 @@
   gettext,
   texinfo,
 }: let
-  version = "0.9.3a";
+  version = "0.9.3";
 
   taler-wallet-core = fetchgit {
     url = "https://git.taler.net/wallet-core.git";
@@ -37,7 +37,7 @@
       url = "https://git.taler.net/exchange.git";
       rev = "v${version}";
       fetchSubmodules = true;
-      sha256 = "sha256-yd67vky8xXPFF0wws5CdKpGD7FyqZFYODD2zwQTxYRk=";
+      sha256 = "sha256-NgDZF6LNeJI4ZuXEwoRdFG6g0S9xNTVhszzlfAnzVOs=";
 
       # When fetching submodules without the .git folder we get the following error:
       # "Server does not allow request for unadvertised object"
@@ -72,19 +72,6 @@
       ./contrib/gana-generate.sh
     '';
 
-    autoreconfPhase = ''
-      cd contrib
-      rm -f Makefile.am
-      find wallet-core/aml-backoffice/ -type f -printf '  %p \\\n' | sort > Makefile.am.ext
-      # Remove extra '\' at the end of the file
-      truncate -s -2 Makefile.am.ext
-      cat Makefile.am.in Makefile.am.ext >> Makefile.am
-      # Prevent accidental editing of the generated Makefile.am
-      chmod -w Makefile.am
-      cd ..
-      autoreconf -fi
-    '';
-
     enableParallelBuilding = true;
 
     nativeCheckInputs = [wget curl];
@@ -117,7 +104,7 @@
       url = "https://git.taler.net/merchant.git";
       rev = "v${version}";
       fetchSubmodules = true;
-      sha256 = "";
+      sha256 = "sha256-HewCqyO/7nnIQY9Tgva0k1nTk2LuwLyGK/UUxvx9BG0=";
     };
     postUnpack = ''
       ln -s ${taler-wallet-core}/spa.html $sourceRoot/contrib/
@@ -151,7 +138,6 @@
 
     nativeCheckInputs = [jq];
     doInstallCheck = true;
-
     checkTarget = "check";
 
     meta = with lib; {

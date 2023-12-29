@@ -11,65 +11,38 @@
   libmicrohttpd,
   pkg-config,
   postgresql,
-  # taler-exchange,
-  # taler-merchant,
+  taler-exchange,
+  taler-merchant,
   libsodium,
   callPackage,
 }: let
   version = "0.9.3";
-  taler = callPackage ./taler.nix {};
-in
-  stdenv.mkDerivation rec {
-    name = "challenger";
-    inherit version;
+  gana = fetchgit {
+    url = "https://git.gnunet.org/gana.git";
+    rev = "c6caa0a91e01b0c74fd71fce71ee5207264a492c";
+    sha256 = "sha256-Y/xDgrBRhlyRe2nbQ7FJEgYk2vg7TAdLwyefnAlM8cg=";
+  };
 
+  prebuilt = fetchgit {
+    url = "https://git.taler.net/docs.git";
+    rev = "5e47a72e8a2b5086dfdae4078f695155f5ed7af8";
+    sha256 = "sha256-e5g2Hwasnezdp67j/vy2ij54D5l0V6M08ONKYvPG/Xk=";
+  };
+
+  te = taler-exchange.overrideAttrs (old: {
     src = fetchgit {
-      url = "https://git.taler.net/challenger.git";
+      url = "https://git.taler.net/exchange.git";
       rev = "v${version}";
-      hash = "sha256-nEEQbU/WogRhciIaIROSxFXtq0q99AifV3XOPQdZZTw=";
+      sha256 = "sha256-P6YLK/eh5h4a4LV/wTNl1mCwFDBicKlypVceLIvVJgc=";
+      fetchSubmodules = false;
     };
 
-    # Taken from ./bootstrap
-    autoreconfPhase = ''
-      cd contrib
-      rm -f Makefile.am
-      find wallet-core/challenger/ -type f -printf '  %p \\\n' | sort > Makefile.am.ext
-      # Remove extra '\' at the end of the file
-      truncate -s -2 Makefile.am.ext
-      cat Makefile.am.in Makefile.am.ext >> Makefile.am
-      # Prevent accidental editing of the generated Makefile.am
-      chmod -w Makefile.am
-      cd ..
-
-
-      echo "$0: Running autoreconf"
-      autoreconf -if
-
+    postUnpack = ''
+      # ln -sn ${gana}/* $sourceRoot/contrib/gana
+      # ln -sn ${prebuilt}/* $sourceRoot/doc/prebuilt
+      cp -r ${gana}/* $sourceRoot/contrib/gana
+      cp -r ${prebuilt}/* $sourceRoot/doc/prebuilt
     '';
-
-    nativeBuildInputs = [
-      pkg-config
-      autoreconfHook
-    ];
-
-    buildInputs = [
-      taler.taler-exchange
-      taler.taler-merchant
-      gnunet
-
-      libmicrohttpd
-      postgresql
-
-      libgcrypt
-      jansson
-      libgnurl
-      curlWithGnuTls
-      libsodium
-    ];
-
-    meta = {
-      homepage = "https://git.taler.net/challenger.git";
-      description = "OAuth 2.0-based authentication service that validates user can receive messages at a certain address.";
-      license = lib.licenses.agpl3Plus;
-    };
-  }
+  });
+in
+  te
