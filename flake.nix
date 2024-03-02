@@ -75,7 +75,8 @@
 
       pkgsByName = import ./pkgs/by-name {
         inherit (pkgs) lib;
-        inherit callPackage dream2nix pnpm2nix-nzbr pkgs;
+        inherit (pkgs) mkPnpmPackage;
+        inherit callPackage dream2nix pkgs;
       };
 
       explicitPkgs = import ./pkgs {
@@ -108,7 +109,10 @@
       rawNixosConfigs;
 
     eachDefaultSystemOutputs = flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = importNixpkgs system [rust-overlay.overlays.default];
+      pkgs = importNixpkgs system [
+        rust-overlay.overlays.default
+        pnpm2nix-nzbr.overlays.default
+      ];
       treefmtEval = loadTreefmt pkgs;
       toplevel = name: config: nameValuePair "nixosConfigs/${name}" config.config.system.build.toplevel;
     in {
