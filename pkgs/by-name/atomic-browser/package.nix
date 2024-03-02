@@ -6,13 +6,9 @@ let
   };
 in
 mkPnpmPackage rec {
-  name = "atomic-web";
-  version = "v0.34.5";
+  name = "atomic-browser";
+  version = "v0.37.0";
   src = "${source}/browser";
-
-  patches = [
-    ./workspaces.patch
-  ];
 
   installPhase = "";
   distPhase = "";

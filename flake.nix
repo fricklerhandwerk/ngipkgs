@@ -18,7 +18,7 @@
   inputs.dream2nix.url = "github:nix-community/dream2nix";
   inputs.dream2nix.inputs.nixpkgs.follows = "nixpkgs";
   inputs.pnpm2nix-nzbr.url = "github:nzbr/pnpm2nix-nzbr";
-  inputs.pnpm2nix-nzbr.inputs.nixpkgs.follows = "nixpkgs"
+  inputs.pnpm2nix-nzbr.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = {
     self,
