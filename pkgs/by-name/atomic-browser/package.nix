@@ -3,7 +3,8 @@ let
   source = fetchFromGitHub {
     owner = "atomicdata-dev";
     repo = "atomic-server";
-    rev = "v0.37.0"
+    rev = "v0.37.0";
+    hash = "sha256-+Lk2MvkTj+B+G6cNbWAbPrN5ECiyMJ4HSiiLzBLd74g=";
   };
 in
 mkPnpmPackage rec {
