@@ -1,7 +1,7 @@
 { pkgs, fetchFromGitHub, mkPnpmPackage, fetchYarnDeps, fetchpatch, ... }:
 let
   source = fetchFromGitHub {
-    owner = "atomicdata-dev";
+    owner = "ngi-nix";
     repo = "atomic-server";
     rev = "v0.37.0";
     hash = "sha256-+Lk2MvkTj+B+G6cNbWAbPrN5ECiyMJ4HSiiLzBLd74g=";
@@ -12,4 +12,5 @@ mkPnpmPackage rec {
   version = "v0.37.0";
   src = "${source}/browser";
 
+  extraBuildInputs = [pkgs.typescript];
 }
