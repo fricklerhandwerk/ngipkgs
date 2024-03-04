@@ -12,5 +12,9 @@ mkPnpmPackage rec {
   version = "v0.37.0";
   src = "${source}/browser";
 
+  installInPlace = true;
+
+  distDir = "."; # Copy everything to the output
+
   extraBuildInputs = [pkgs.typescript];
 }
