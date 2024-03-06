@@ -3,8 +3,8 @@ let
   source = fetchFromGitHub {
     owner = "ngi-nix";
     repo = "atomic-server";
-    rev = "fix-ts-5.3.2";
-    hash = "sha256-gcw7Py1GhDZt+lvcehDULij5mOCcZ1wZDlyWLZu693E=";
+    rev = "v0.37.0";
+    hash = "sha256-+Lk2MvkTj+B+G6cNbWAbPrN5ECiyMJ4HSiiLzBLd74g=";
   };
 in
 mkPnpmPackage rec {
