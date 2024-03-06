@@ -1,7 +1,7 @@
 { pkgs, fetchFromGitHub, mkPnpmPackage, fetchYarnDeps, fetchpatch, ... }:
 let
   source = fetchFromGitHub {
-    owner = "ngi-nix";
+    owner = "atomicdata-dev";
     repo = "atomic-server";
     rev = "v0.37.0";
     hash = "sha256-+Lk2MvkTj+B+G6cNbWAbPrN5ECiyMJ4HSiiLzBLd74g=";
