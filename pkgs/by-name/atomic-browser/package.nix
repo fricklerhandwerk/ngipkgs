@@ -1,4 +1,5 @@
 {
+  mkDerivation,
   fetchFromGitHub,
   lib,
   nodePackages,
@@ -11,7 +12,7 @@
     maintainers
     ;
 in
-mkPnpmPackage rec {
+mkDerivation rec {
   pname = "atomic-browser";
   version = "v0.37.0";
 
@@ -23,11 +24,17 @@ mkPnpmPackage rec {
   };
 
   src = "${monorepoSrc}/browser";
+  pnpmDeps = fetchPnpmDeps {
+    inherit src pname;
+    hash = "";
+  };
+
+  nativeBuildInputs = [ pnpmConfigHook ];
 
   # These 2 options are needed to work with pnpm workspaces, which atomic-browser is using
   # https://github.com/nzbr/pnpm2nix-nzbr/issues/29#issuecomment-1918811838
-  installInPlace = true;
-  distDir = ".";
+  #installInPlace = true;
+  #distDir = ".";
 
   meta = {
     description = "Create, share, fetch and model linked Atomic Data! There are three components: a javascript / typescript library, a react library, and a complete GUI: Atomic-Data Browser.";
