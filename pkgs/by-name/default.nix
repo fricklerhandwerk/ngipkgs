@@ -3,6 +3,8 @@
   callPackage,
   dream2nix,
   mkPnpmPackage,
+  fetchPnpmDeps,
+  pnpmConfigHook,
   pkgs,
 }: let
   baseDirectory = ./.;
@@ -49,7 +51,7 @@
     mapAttrs (
       _: directory:
         if pathExists (directory + "/package.nix")
-        then callPackage (directory + "/package.nix") {}
+        then callPackage (directory + "/package.nix") { }
         else if pathExists (directory + "/dream2.nix")
         then callModule (directory + "/dream2.nix")
         else throw "No package.nix or dream2.nix found in ${directory}"

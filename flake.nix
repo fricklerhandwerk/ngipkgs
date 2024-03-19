@@ -77,6 +77,7 @@
         inherit (pkgs) lib;
         inherit (pkgs) mkPnpmPackage;
         inherit callPackage dream2nix pkgs;
+        inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps pnpmConfigHook;
       };
 
       explicitPkgs = import ./pkgs {
