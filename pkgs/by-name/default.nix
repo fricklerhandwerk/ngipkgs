@@ -3,8 +3,6 @@
   callPackage,
   dream2nix,
   mkPnpmPackage,
-  fetchPnpmDeps,
-  pnpmConfigHook,
   pkgs,
 }: let
   baseDirectory = ./.;

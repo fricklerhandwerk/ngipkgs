@@ -33,6 +33,11 @@
       pretalx-venueless
       pretalx-public-voting
       ;
+
+
+      inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps;
+      inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) pnpmConfigHook;
+    atomic-browser = callPackage ./atomic-browser {};
   };
 in
   self
