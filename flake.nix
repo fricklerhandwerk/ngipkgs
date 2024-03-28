@@ -109,6 +109,8 @@
       treefmtEval = loadTreefmt pkgs;
       toplevel = name: config: nameValuePair "nixosConfigs/${name}" config.config.system.build.toplevel;
 
+      importPack = importPackages pkgs;
+
       dummy = import (nixpkgs + "/nixos/lib/eval-config.nix") {
         inherit system;
         modules =
@@ -123,13 +125,29 @@
           ];
       };
       options = builtins.mapAttrs (name: _: dummy.options.services.${name} or {}) self.nixosModules;
+      optionsDoc = pkgs.nixosOptionsDoc {inherit options;};
     in {
       packages =
-        (importPackages pkgs)
+        importPack
         // {
-          options = pkgs.runCommand "options.json" {
-            build = (pkgs.nixosOptionsDoc {inherit options;}).optionsJSON;
-          } "cp $build/share/doc/nixos/options.json $out";
+          overview =
+            pkgs.runCommand "overview" {
+              build = pkgs.writeTextFile {
+                name = "overview.html";
+                text = import ./overview.nix self pkgs.lib importPack optionsDoc.optionsNix;
+              };
+            } ''
+              mkdir $out
+              cp $build $out/index.html
+            '';
+
+          options =
+            pkgs.runCommand "options.json" {
+              build = optionsDoc.optionsJSON;
+            } ''
+              mkdir $out
+              cp $build/share/doc/nixos/options.json $out/
+            '';
         };
 
       formatter = treefmtEval.config.build.wrapper;
