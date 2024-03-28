@@ -4,12 +4,12 @@ self: lib: packages: options: let
   thisOption = actual: expected: startsWith expected actual;
   anyOption = options: actual: builtins.any (thisOption actual) (map concatDot options);
 
-  header = "<html><head><title>${self.rev or self.dirtyRev}</title></head><body>";
-  footer = "</body></html>";
+  header = "<html lang=\"en\"><head><title>NGIpkgs Overview</title></head><body>";
+  footer = "<hr><footer>Version: ${self.rev or self.dirtyRev}</footer></body></html>";
 
   ngiDetails = ngi: "<p><b>NLNet Project:</b> <a href=\"https://nlnet.nl/project/${ngi.project}\">${ngi.project}</a></p>";
 
-  myoption = name: value: "<dt><code>${name}</code></dt><dd><table><tr><td>Type</td><td>${value.type}</td></tr><tr><td>Description</td><td>${value.description}</td></tr></table></dd>";
+  myoption = name: value: "<dt>`name`</dt><dd><table><tr><td>Type</td><td>${value.type}</td></tr><tr><td>Description</td><td>${value.description}</td></tr></table></dd>";
 in
   header
   + "<h1>Packages</h1>"
@@ -17,7 +17,7 @@ in
     builtins.attrValues
     (builtins.mapAttrs (
         name: x:
-          "<section><h2>Package: <code>${name}</code></h2>"
+          "<section><h2>Package: `${name}`</h2>"
           + (
             if x ? meta.ngi
             then ngiDetails x.meta.ngi

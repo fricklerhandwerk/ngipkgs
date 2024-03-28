@@ -132,13 +132,16 @@
         // {
           overview =
             pkgs.runCommand "overview" {
+              nativeBuildInputs = with pkgs; [ jq pandoc validator-nu ];
               build = pkgs.writeTextFile {
                 name = "overview.html";
                 text = import ./overview.nix self pkgs.lib importPack optionsDoc.optionsNix;
               };
             } ''
               mkdir $out
-              cp $build $out/index.html
+              echo "<!DOCTYPE html>" > $out/index.html
+              pandoc --from=markdown+raw_html --to=html < $build >> $out/index.html
+              vnu --Werror --format json $out 2>&1 | jq
             '';
 
           options =
