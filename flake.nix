@@ -12,6 +12,7 @@
   inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   inputs.sops-nix.url = "github:Mic92/sops-nix";
   inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.libre-soc.url = "git+https://git.libre-soc.org/git/soc.git";
 
   outputs = {
     self,
@@ -19,6 +20,7 @@
     flake-utils,
     treefmt-nix,
     sops-nix,
+    libre-soc,
     ...
   }:
     with builtins; let
@@ -52,7 +54,12 @@
           inherit (pkgs) lib;
           inherit callPackage;
         };
-        result = (import ./pkgs/by-name args) // (import ./pkgs args);
+        result =
+          (import ./pkgs/by-name args)
+          // (import ./pkgs args)
+          // {
+            soc = libre-soc.packages.${pkgs.system}.soc;
+          };
       in
         result;
 
