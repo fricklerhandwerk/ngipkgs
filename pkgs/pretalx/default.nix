@@ -186,8 +186,8 @@ in
         ]
         ++ (with (import ../../maintainers/maintainers-list.nix); [augustebaum kubaneko]);
       ngi = {
-        project = "Rosenpass";
-        options = [["services" pname]];
+        project = "Pretalx";
+        options = [["services" "pretalx"]];
       };
     };
   }
