@@ -50,7 +50,7 @@
         );
         args = {
           inherit (pkgs) lib;
-          inherit callPackage;
+          inherit callPackage runCommand;
         };
         result = (import ./pkgs/by-name args) // (import ./pkgs args);
       in

@@ -1,6 +1,7 @@
 {
   lib,
   callPackage,
+  runCommand,
 }: let
   self = rec {
     # LiberaForms is intentionally disabled.
@@ -28,6 +29,11 @@
       pretalx-venueless
       pretalx-public-voting
       ;
+
+    libresoc = rec {
+      pinmux = callPackage ./libresoc/pinmux.nix {};
+      verilog = callPackage ./libresoc/verilog.nix {inherit pinmux;};
+    };
   };
 in
   self
