@@ -2,7 +2,6 @@
   stdenv,
   fetchFromGitHub,
   lib,
-  mkPnpmPackage,
   nodePackages,
   fetchPnpmDeps,
   pnpmConfigHook,
