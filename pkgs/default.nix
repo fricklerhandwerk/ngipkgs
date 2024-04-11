@@ -35,8 +35,7 @@
       ;
 
 
-    inherit (callPackage ./build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps;
-    inherit (callPackage ./build-support/node/fetch-pnpm-deps { }) pnpmConfigHook;
+    inherit (callPackage ./build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps pnpmConfigHook;
     atomic-browser = callPackage ./atomic-browser {};
   };
 in
