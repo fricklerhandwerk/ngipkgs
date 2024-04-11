@@ -132,10 +132,15 @@
         // {
           overview =
             pkgs.runCommand "overview" {
-              nativeBuildInputs = with pkgs; [ jq pandoc validator-nu ];
+              nativeBuildInputs = with pkgs; [jq pandoc validator-nu];
               build = pkgs.writeTextFile {
                 name = "overview.html";
-                text = import ./overview.nix self pkgs.lib importPack optionsDoc.optionsNix;
+                text = import ./overview.nix {
+                  inherit self;
+                  inherit (pkgs) lib;
+                  ngipkgs = importPack;
+                  options = optionsDoc.optionsNix;
+                };
               };
             } ''
               mkdir $out

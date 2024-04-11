@@ -1,44 +1,118 @@
-self: lib: packages: options: let
-  startsWith = a: b: builtins.substring 0 (builtins.stringLength a) b == a;
-  concatDot = builtins.concatStringsSep ".";
-  thisOption = actual: expected: startsWith expected actual;
-  anyOption = options: actual: builtins.any (thisOption actual) (map concatDot options);
+{
+  self,
+  lib,
+  ngipkgs,
+  options,
+  ...
+}: let
+  title = "NGIpkgs Overview";
+  ngipkgsValues = builtins.attrValues ngipkgs;
 
-  header = "<html lang=\"en\"><head><title>NGIpkgs Overview</title></head><body>";
-  footer = "<hr><footer>Version: ${self.rev or self.dirtyRev}</footer></body></html>";
+  empty = xs: assert builtins.isList xs; xs == [];
+  heading = i: text: "${lib.strings.replicate i "#"} ${text}";
+  isPrefixOf = prefix: candidate: prefix == lib.lists.commonPrefix prefix candidate;
 
-  ngiDetails = ngi: "<p><b>NLNet Project:</b> <a href=\"https://nlnet.nl/project/${ngi.project}\">${ngi.project}</a></p>";
+  anyOption = options: actual: builtins.any ((lib.trivial.flip isPrefixOf) actual) options;
+  version = self.rev or self.dirtyRev;
 
-  myoption = name: value: "<dt>`name`</dt><dd><table><tr><td>Type</td><td>${value.type}</td></tr><tr><td>Description</td><td>${value.description}</td></tr></table></dd>";
-in
-  header
-  + "<h1>Packages</h1>"
-  + builtins.concatStringsSep "" (
-    builtins.attrValues
-    (builtins.mapAttrs (
-        name: x:
-          "<section><h2>Package: `${name}`</h2>"
-          + (
-            if x ? meta.ngi
-            then ngiDetails x.meta.ngi
-            else ""
-          )
-          + (
-            "<h3>Options</h3><dl>"
-            + (
-              builtins.concatStringsSep "" (
-                builtins.attrValues (
-                  builtins.mapAttrs myoption (
-                    lib.filterAttrs (n: v: anyOption (x.meta.ngi.options or []) n)
-                    options
-                  )
-                )
-              )
-              + "</dl>"
-            )
-          )
-          + "</section>"
-      )
-      packages)
-  )
-  + footer
+  projects = lib.lists.unique (
+    map (x: x.meta.ngi.project) (builtins.filter (x: x ? meta.ngi) ngipkgsValues)
+  );
+
+  packagesByProject = project: builtins.filter (x: x.meta.ngi.project or null == project) ngipkgsValues;
+
+  packagesWithoutProject = packagesByProject null;
+
+  # Options
+
+  optionSpecByProject = project:
+    lib.lists.unique (
+      builtins.concatMap (x: x.meta.ngi.options) (builtins.filter (x: x ? meta.ngi.options) ngipkgsValues)
+    );
+
+  optionsByProject = project:
+    builtins.filter
+    (option: anyOption (optionSpecByProject project) option.loc)
+    (builtins.attrValues options);
+
+  renderOptions = projectOptions:
+    lib.strings.optionalString (!empty projectOptions)
+    "<dl>${lib.strings.concatLines (map renderOption projectOptions)}</dl>";
+
+  renderOption = value: let
+    dottedName = builtins.concatStringsSep "." value.loc;
+    maybeDefault = lib.strings.optionalString (value ? default.text) "`${value.default.text}`";
+  in ''
+    <dt>`${dottedName}`</dt>
+    <dd>
+      <table>
+        <tr>
+          <td>Description:</td>
+          <td>${value.description}</td>
+        </tr>
+        <tr>
+          <td>Type:</td>
+          <td>`${value.type}`</td>
+        </tr>
+        <tr>
+          <td>Default:</td>
+          <td>${maybeDefault}</td>
+        </tr>
+      </table>
+    </dd>
+  '';
+
+  # Packages
+
+  renderPackage = package: ''
+    <dt>`${package.name}`</dt>
+    <dd>
+      <table>
+        <tr>
+          <td>Version:</td>
+          <td>${package.version}</td>
+        </tr>
+      </table>
+    </dd>
+  '';
+
+  renderPackages = packages:
+    lib.strings.optionalString (!empty packages)
+    "<dl>${lib.strings.concatLines (map renderPackage packages)}</dl>";
+
+  renderProject = project: let
+    projectPackages = packagesByProject project;
+    maybePackagesHeader = lib.strings.optionalString (!empty projectPackages) (heading 3 "Packages");
+    renderedPackages = renderPackages projectPackages;
+    projectOptions = optionsByProject project;
+    maybeOptionsHeader = lib.strings.optionalString (!empty projectOptions) (heading 3 "Options");
+    renderedOptions = renderOptions projectOptions;
+  in ''
+    ${heading 2 project}
+    <https://nlnet.nl/project/${project}>
+
+    ${maybePackagesHeader}
+    ${renderedPackages}
+    ${maybeOptionsHeader}
+    ${renderedOptions}
+  '';
+in ''
+  <html lang="en">
+  <head>
+  <title>${title}</title>
+  </head>
+  <body>
+
+  ${heading 1 title}
+
+  ${lib.strings.concatLines (map renderProject projects)}
+
+  ${heading 2 "Packages without Project Metadata"}
+
+  ${renderPackages packagesWithoutProject}
+
+  <hr>
+  <footer>Version: ${version}</footer>
+  </body>
+  </html>
+''
