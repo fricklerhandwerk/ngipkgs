@@ -14,7 +14,14 @@
 
   anyOption = options: actual: builtins.any ((lib.trivial.flip isPrefixOf) actual) options;
 
-  version = if self ? rev then "[`${builtins.substring 0 7 self.rev}`](https://github.com/ngi-nix/ngipkgs/tree/${self.rev})" else self.dirtyRev;
+  lastModified = let
+    sub = start: len: builtins.substring start len self.lastModifiedDate;
+  in "${sub 0 4}-${sub 4 2}-${sub 6 2}T${sub 8 2}:${sub 10 2}:${sub 12 2}Z";
+
+  version =
+    if self ? rev
+    then "[`${self.shortRev}`](https://github.com/ngi-nix/ngipkgs/tree/${self.rev})"
+    else self.dirtyRev;
 
   projects = lib.lists.unique (
     map (x: x.meta.ngi.project) (builtins.filter (x: x ? meta.ngi) ngipkgsValues)
@@ -113,7 +120,7 @@ in ''
   ${renderPackages packagesWithoutProject}
 
   <hr>
-  <footer>Version: ${version}</footer>
+  <footer>Version: ${version}, Last Modified: ${lastModified}</footer>
   </body>
   </html>
 ''
