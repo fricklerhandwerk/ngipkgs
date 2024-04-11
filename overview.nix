@@ -13,7 +13,8 @@
   isPrefixOf = prefix: candidate: prefix == lib.lists.commonPrefix prefix candidate;
 
   anyOption = options: actual: builtins.any ((lib.trivial.flip isPrefixOf) actual) options;
-  version = self.rev or self.dirtyRev;
+
+  version = if self ? rev then "[`${builtins.substring 0 7 self.rev}`](https://github.com/ngi-nix/ngipkgs/tree/${self.rev})" else self.dirtyRev;
 
   projects = lib.lists.unique (
     map (x: x.meta.ngi.project) (builtins.filter (x: x ? meta.ngi) ngipkgsValues)
