@@ -67,13 +67,14 @@
         mapAttrs dirToTest testDirs;
 
       callPackage = pkgs.newScope (
-        allPackages // {inherit callPackage nixosTests;}
+        allPackages
+        // {inherit callPackage nixosTests;}
+        // {inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps pnpmConfigHook;}
       );
 
       pkgsByName = import ./pkgs/by-name {
         inherit (pkgs) lib;
         inherit callPackage dream2nix pkgs;
-        inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps pnpmConfigHook;
       };
 
       explicitPkgs = import ./pkgs {
