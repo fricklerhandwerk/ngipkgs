@@ -1,5 +1,5 @@
 {
-  stdenv,
+  mkDerivation,
   fetchFromGitHub,
   lib,
   nodePackages,
@@ -12,7 +12,7 @@
     maintainers
     ;
 in
-stdenv.mkDerivation rec {
+mkDerivation rec {
   pname = "atomic-browser";
   version = "v0.37.0";
 
