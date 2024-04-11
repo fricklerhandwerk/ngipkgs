@@ -1,15 +1,19 @@
 {
+  callPackage,
   stdenv,
   fetchFromGitHub,
   lib,
   nodePackages,
-  fetchPnpmDeps,
-  pnpmConfigHook,
 }: let
   inherit
     (lib)
     licenses
     maintainers
+    ;
+  inherit
+    (callPackage ../../build-support/node/fetch-pnpm-deps { })
+    fetchPnpmDeps
+    pnpmConfigHook
     ;
 in
 stdenv.mkDerivation rec {

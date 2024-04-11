@@ -67,9 +67,7 @@
         mapAttrs dirToTest testDirs;
 
       callPackage = pkgs.newScope (
-        allPackages
-        // {inherit callPackage nixosTests;}
-        // {inherit (callPackage ./pkgs/build-support/node/fetch-pnpm-deps { }) fetchPnpmDeps pnpmConfigHook;}
+        allPackages // {inherit callPackage nixosTests;}
       );
 
       pkgsByName = import ./pkgs/by-name {
