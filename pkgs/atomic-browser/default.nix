@@ -26,10 +26,22 @@ stdenv.mkDerivation rec {
   src = "${monorepoSrc}/browser";
   pnpmDeps = fetchPnpmDeps {
     inherit src pname;
-    hash = "";
+    hash = "sha256-sXXEgMBKImeGIYrFw17Uie6qTylKrJ9MNm8WJFRAi1A=";
   };
 
-  nativeBuildInputs = [ pnpmConfigHook ];
+  nativeBuildInputs = [
+    pnpmConfigHook
+    nodePackages.pnpm
+  ];
+
+  postBuild = ''
+    pnpm build
+  '';
+
+  installPhase = ''
+    cp -R ./data-browser/dist/ $out/
+  '';
+
 
   # These 2 options are needed to work with pnpm workspaces, which atomic-browser is using
   # https://github.com/nzbr/pnpm2nix-nzbr/issues/29#issuecomment-1918811838
