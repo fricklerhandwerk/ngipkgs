@@ -23,9 +23,5 @@ php.buildComposerProject (finalAttrs: {
     description = "Flarum is a delightfully simple discussion platform for your website";
     homepage = "https://github.com/flarum/flarum";
     license = lib.licenses.mit;
-    ngi = {
-      project = "Flarum";
-      options = [["services" "flarum"]];
-    };
   };
 })

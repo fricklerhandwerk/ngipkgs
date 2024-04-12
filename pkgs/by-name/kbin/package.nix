@@ -11,17 +11,13 @@ runCommand "kbin" {
     kbin-backend.passthru
     // {
       tests = {
-        inherit (nixosTests) kbin;
+        inherit (nixosTests.Kbin) kbin;
       };
     };
   meta = {
     license = lib.licenses.agpl3Only;
     homepage = "https://kbin.pub/";
     description = "/kbin is a modular, decentralized content aggregator and microblogging platform running on the Fediverse network.";
-    ngi = {
-      project = "Kbin";
-      options = [["services" "kbin"]];
-    };
   };
 } ''
   # As of 2023-10-09, there is no way to just symlink

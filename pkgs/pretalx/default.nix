@@ -171,7 +171,7 @@ in
       inherit python;
       PYTHONPATH = "${python.pkgs.makePythonPath propagatedBuildInputs}:${pretalx.outPath}/${python.sitePackages}";
 
-      tests.pretalx = nixosTests.pretalx;
+      tests.pretalx = nixosTests.Pretalx.pretalx;
     };
 
     meta = {
@@ -185,9 +185,5 @@ in
           lorenzleutgeb
         ]
         ++ (with (import ../../maintainers/maintainers-list.nix); [augustebaum kubaneko]);
-      ngi = {
-        project = "Pretalx";
-        options = [["services" "pretalx"]];
-      };
     };
   }

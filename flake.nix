@@ -27,12 +27,13 @@
     rust-overlay,
     dream2nix,
     ...
-  }: let
+  } @ inputs: let
     inherit
       (builtins)
-      readDir
       mapAttrs
       attrValues
+      isAttrs
+      concatStringsSep
       ;
 
     inherit
@@ -45,26 +46,53 @@
       nixosSystem
       filterAttrs
       attrByPath
+      foldlAttrs
       ;
 
+    flattenAttrs = {
+      prefix ? [],
+      sep ? ".",
+    }: x: let
+      f = path:
+        foldlAttrs (acc: name: value:
+          (
+            if isAttrs value
+            then (f "${path}${name}${sep}" value)
+            else {"${path}${name}" = value;}
+          )
+          // acc) {};
+    in
+      f (
+        if prefix == []
+        then ""
+        else (concatStringsSep sep prefix) + sep
+      )
+      x;
+
+    importProjects = {
+      pkgs ? {},
+      lib ? inputs.nixpkgs.lib,
+      sources ? {},
+    }:
+      import ./projects {inherit lib pkgs sources;};
+
+    mapAttrByPath = attrPath: default: mapAttrs (_: attrByPath attrPath default);
+
+    pickNixosModules = mapAttrByPath ["nixos" "modules"] {};
+
+    pickPackages = mapAttrByPath ["packages"] {};
+
+    pickNixosTests = mapAttrByPath ["nixos" "tests"] {};
+
+    pickNixosConfigurations = x: mapAttrs (_: v: mapAttrs (_: v: v.path) v) (mapAttrByPath ["nixos" "configurations"] {} x);
+
     importPackages = pkgs: let
-      nixosTests = let
-        dir = ./tests;
-        testDirs = readDir dir;
-
-        dirToTest = name: _: let
-          mkTestModule = import "${dir}/${name}";
-
-          testModule = mkTestModule {
-            inherit pkgs;
-            inherit (pkgs) lib;
-            modules = extendedModules;
-            configurations = rawNixosConfigs;
-          };
-        in
-          pkgs.nixosTest testModule;
-      in
-        mapAttrs dirToTest testDirs;
+      nixosTests = pickNixosTests (importProjects {
+        inherit pkgs;
+        lib = inputs.nixpkgs.lib;
+        sources.configurations = rawNixosConfigs;
+        sources.modules = extendedModules;
+      });
 
       callPackage = pkgs.newScope (
         allPackages // {inherit callPackage nixosTests;}
@@ -87,9 +115,12 @@
     importNixpkgs = system: overlays:
       import nixpkgs {inherit system overlays;};
 
-    rawNixosConfigs = import ./configs/all-configurations.nix;
+    rawNixosConfigs = flattenAttrs {sep = "/";} (pickNixosConfigurations (importProjects {}));
 
     loadTreefmt = pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+
+    # Overlays a package set (e.g. nixpkgs) with the packages defined in this flake.
+    overlay = final: prev: importPackages prev;
 
     # Attribute set containing all modules obtained via `inputs` and defined
     # in this flake towards definition of `nixosConfigurations` and `nixosTests`.
@@ -101,13 +132,13 @@
 
     nixosConfigurations =
       mapAttrs
-      (_: config: nixosSystem {modules = [config ./configs/dummy.nix] ++ attrValues extendedModules;})
+      (_: config: nixosSystem {modules = [config ./dummy.nix] ++ attrValues extendedModules;})
       rawNixosConfigs;
 
     eachDefaultSystemOutputs = flake-utils.lib.eachDefaultSystem (system: let
       pkgs = importNixpkgs system [rust-overlay.overlays.default];
       treefmtEval = loadTreefmt pkgs;
-      toplevel = name: config: nameValuePair "nixosConfigs/${name}" config.config.system.build.toplevel;
+      toplevel = name: config: nameValuePair "nixosConfigurations/${name}" config.config.system.build.toplevel;
 
       importPack = importPackages pkgs;
 
@@ -205,14 +236,23 @@
 
       nixosModules =
         (import ./modules/all-modules.nix)
+        // (
+          flattenAttrs {sep = "/";} (pickNixosModules (importProjects {
+            sources = {
+              inherit inputs;
+              inherit self;
+              modules = extendedModules;
+              configurations = rawNixosConfigs;
+            };
+          }))
+        )
         // {
           # The default module adds the default overlay on top of nixpkgs.
           # This is so that `ngipkgs` can be used alongside `nixpkgs` in a configuration.
           default.nixpkgs.overlays = [self.overlays.default];
         };
 
-      # Overlays a package set (e.g. nixpkgs) with the packages defined in this flake.
-      overlays.default = final: prev: importPackages prev;
+      overlays.default = overlay;
     };
   in
     foldr recursiveUpdate {} [

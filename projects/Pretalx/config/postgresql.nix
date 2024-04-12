@@ -1,21 +1,17 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   services = {
     pretalx.database = {
-      backend = "mysql";
-      host = "/var/run/mysqld/mysqld.sock";
+      backend = "postgresql";
+      user = "pretalx";
     };
 
-    mysql = {
+    postgresql = {
       enable = true;
-      package = pkgs.mysql;
+      authentication = "local all all trust";
       ensureUsers = [
         {
           name = config.services.pretalx.database.user;
-          ensurePermissions."${config.services.pretalx.database.name}.*" = "ALL PRIVILEGES";
+          ensureDBOwnership = true;
         }
       ];
       ensureDatabases = [config.services.pretalx.database.name];
