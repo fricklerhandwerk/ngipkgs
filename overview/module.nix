@@ -1,4 +1,9 @@
-{ lib, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   project =
@@ -42,6 +47,10 @@ in
       }
     );
     default = { };
+  };
+  options.out = mkOption {
+    type = types.pathInStore;
+    default = pkgs.writeTextDir "./index.html" "${config}";
   };
   options.__toString = mkOption {
     type = with types; functionTo str;

@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 let
   # TODO: this should be in a check that produces something, so at least it evals/builds once
   eval = lib.evalModules {
@@ -6,6 +6,9 @@ let
       ./module.nix
       # TODO: read from `//projects`
       {
+        _module.args = {
+          inherit pkgs;
+        };
         overview.projects = {
           example1 = { };
           example2 = { };

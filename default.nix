@@ -255,6 +255,13 @@ rec {
   };
 
   module-overview = pkgs.callPackage ./overview/module-test.nix { };
+  module-shell = pkgs.mkShellNoCC {
+    packages = [
+      (pkgs.devmode.override {
+        buildArgs = "-A module-overview --show-trace";
+      })
+    ];
+  };
 
   demo = import ./overview/demo {
     inherit
