@@ -254,6 +254,8 @@ rec {
     ];
   };
 
+  module-overview = pkgs.callPackage ./overview/module-test.nix { };
+
   demo = import ./overview/demo {
     inherit
       lib
